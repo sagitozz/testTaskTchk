@@ -2,7 +2,7 @@ package com.testtask.testtasktchk.di
 
 import com.testtask.testtasktchk.app.App
 import com.testtask.testtasktchk.di.app.ApplicationComponent
-import com.testtask.testtasktchk.di.auth.AuthComponent
+import com.testtask.testtasktchk.di.googleauth.GoogleAuthComponent
 import dagger.Component
 import javax.inject.Singleton
 
@@ -12,7 +12,7 @@ import javax.inject.Singleton
 @Component(
     dependencies = [
         ApplicationComponent::class,
-        AuthComponent::class
+        GoogleAuthComponent::class
     ]
 )
 @Singleton
@@ -24,8 +24,8 @@ interface AppComponent {
     interface Factory {
         fun create(
             applicationComponent: ApplicationComponent,
-            authComponent: AuthComponent
-        ) : AppComponent
+            googleAuthComponent: GoogleAuthComponent
+        ): AppComponent
     }
 
     fun activityComponent(): ActivityComponent

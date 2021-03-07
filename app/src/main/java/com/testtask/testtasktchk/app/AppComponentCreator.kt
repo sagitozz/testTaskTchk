@@ -4,7 +4,7 @@ import android.content.Context
 import com.testtask.testtasktchk.di.AppComponent
 import com.testtask.testtasktchk.di.DaggerAppComponent
 import com.testtask.testtasktchk.di.app.DaggerApplicationComponent
-import com.testtask.testtasktchk.di.auth.DaggerAuthComponent
+import com.testtask.testtasktchk.di.googleauth.DaggerGoogleAuthComponent
 
 /**
  * @autor d.snytko
@@ -16,7 +16,7 @@ object AppComponentCreator {
 
         return DaggerAppComponent.factory().create(
             applicationComponent = applicationComponent,
-            authComponent = DaggerAuthComponent.factory().create(applicationComponent)
+            googleAuthComponent = DaggerGoogleAuthComponent.factory().create(applicationComponent)
         )
     }
 }

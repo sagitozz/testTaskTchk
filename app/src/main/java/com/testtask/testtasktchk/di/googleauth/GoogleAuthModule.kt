@@ -1,4 +1,4 @@
-package com.testtask.testtasktchk.di.auth
+package com.testtask.testtasktchk.di.googleauth
 
 import com.testtask.testtasktchk.auth.GoogleAuthProvider
 import com.testtask.testtasktchk.auth.GoogleAuthProviderImpl
@@ -9,7 +9,7 @@ import dagger.Module
  * @autor d.snytko
  */
 @Module
-interface AuthModule {
+interface GoogleAuthModule {
 
     @Binds
     fun bindsGoogleAuthProvider(impl: GoogleAuthProviderImpl): GoogleAuthProvider

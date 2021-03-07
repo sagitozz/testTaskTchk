@@ -1,4 +1,4 @@
-package com.testtask.testtasktchk.ui
+package com.testtask.testtasktchk.ui.auth
 
 import android.app.Activity
 import android.content.Context
@@ -13,6 +13,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.testtask.testtasktchk.auth.GoogleAuthProvider
 import com.testtask.testtasktchk.R
 import com.testtask.testtasktchk.app.App
+import com.testtask.testtasktchk.ui.main.SearchActivity
 import javax.inject.Inject
 
 /**
@@ -62,7 +63,7 @@ class AuthActivity : AppCompatActivity() {
 
     private fun openNewActivity(it: GoogleSignInAccount) {
         startActivity(
-            MainActivity.createIntent(
+            SearchActivity.createIntent(
                 this,
                 name = it.displayName,
                 email = it.email,

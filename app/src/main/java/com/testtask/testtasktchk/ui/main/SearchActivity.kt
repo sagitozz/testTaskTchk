@@ -1,4 +1,4 @@
-package com.testtask.testtasktchk.ui
+package com.testtask.testtasktchk.ui.main
 
 import android.content.Context
 import android.content.Intent
@@ -7,18 +7,26 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.addTextChangedListener
 import com.google.android.material.navigation.NavigationView
 import com.squareup.picasso.Picasso
 import com.testtask.testtasktchk.R
 import com.testtask.testtasktchk.app.App
 import com.testtask.testtasktchk.auth.GoogleAuthProvider
+import com.testtask.testtasktchk.ui.auth.AuthActivity
 import javax.inject.Inject
 
-class MainActivity : AppCompatActivity() {
+class SearchActivity : AppCompatActivity() {
 
     @Inject
     internal lateinit var googleAuthProvider: GoogleAuthProvider
+
+    @Inject
+    internal lateinit var viewModelFactory: SearchViewModelFactory
+
+    val searchViewModel: SearchViewModel by viewModels { viewModelFactory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         App.appComponent.activityComponent().inject(this)
@@ -26,6 +34,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         initDrawer()
+        initSearchView()
     }
 
     private fun initDrawer() {
@@ -44,6 +53,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun initSearchView() {
+        findViewById<TextView>(R.id.search_field).addTextChangedListener {
+        searchViewModel.search(it.toString())
+        }
+    }
+
     private fun logout() {
         googleAuthProvider.logout()
         startActivity(AuthActivity.createIntent(this))
@@ -57,7 +72,7 @@ class MainActivity : AppCompatActivity() {
         private const val EXTRA_AVATAR_URL = "avatar_url"
 
         fun createIntent(context: Context, name: String?, email: String?, avatarUrl: Uri?): Intent {
-            return Intent(context, MainActivity::class.java)
+            return Intent(context, SearchActivity::class.java)
                 .putExtra(EXTRA_NAME, name)
                 .putExtra(EXTRA_EMAIL, email)
                 .putExtra(EXTRA_AVATAR_URL, avatarUrl)
