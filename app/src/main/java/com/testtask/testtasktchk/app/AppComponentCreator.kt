@@ -16,7 +16,8 @@ object AppComponentCreator {
 
         return DaggerAppComponent.factory().create(
             applicationComponent = applicationComponent,
-            googleAuthComponent = DaggerGoogleAuthComponent.factory().create(applicationComponent)
+            googleAuthComponent = DaggerGoogleAuthComponent.factory().create(applicationComponent),
+            userComponent = DaggerUserComponent.factory().create(applicationComponent)
         )
     }
 }

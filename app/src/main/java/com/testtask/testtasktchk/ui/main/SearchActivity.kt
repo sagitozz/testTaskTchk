@@ -7,9 +7,11 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.Observer
 import com.google.android.material.navigation.NavigationView
 import com.squareup.picasso.Picasso
 import com.testtask.testtasktchk.R
@@ -20,13 +22,14 @@ import javax.inject.Inject
 
 class SearchActivity : AppCompatActivity() {
 
+    private val searchViewModel: SearchViewModel by viewModels { viewModelFactory }
+    private val usersListAdapter by lazy { UsersAdapter() }
+
     @Inject
     internal lateinit var googleAuthProvider: GoogleAuthProvider
 
     @Inject
     internal lateinit var viewModelFactory: SearchViewModelFactory
-
-    val searchViewModel: SearchViewModel by viewModels { viewModelFactory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         App.appComponent.activityComponent().inject(this)
@@ -35,6 +38,16 @@ class SearchActivity : AppCompatActivity() {
 
         initDrawer()
         initSearchView()
+        initViewModel()
+    }
+
+    private fun initViewModel() {
+        searchViewModel.userLiveData.observe(this, Observer {   userList ->
+            usersListAdapter.update(userList.users)
+        })
+        searchViewModel.errorLiveData.observe(this, Observer { error ->
+            Toast.makeText(this, error.message, Toast.LENGTH_LONG).show()
+        })
     }
 
     private fun initDrawer() {

@@ -3,14 +3,21 @@ package com.testtask.testtasktchk.di.app
 import android.content.Context
 import dagger.BindsInstance
 import dagger.Component
+import retrofit2.Retrofit
+import javax.inject.Singleton
 
 /**
  * @autor d.snytko
  */
-@Component
+@Singleton
+@Component(
+    modules = [NetworkModule::class]
+)
 interface ApplicationComponent {
 
     val context: Context
+
+    val retrofit: Retrofit
 
     @Component.Factory
     interface Factory {
