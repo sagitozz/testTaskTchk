@@ -1,4 +1,4 @@
-package com.testtask.testtasktchk
+package com.testtask.testtasktchk.ui
 
 import android.content.Context
 import android.content.Intent
@@ -10,12 +10,18 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.navigation.NavigationView
 import com.squareup.picasso.Picasso
+import com.testtask.testtasktchk.R
+import com.testtask.testtasktchk.app.App
+import com.testtask.testtasktchk.auth.GoogleAuthProvider
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
 
-    private val googleAuthHelper: GoogleAuthHelper by lazy(LazyThreadSafetyMode.NONE) { GoogleAuthHelper(this) }
+    @Inject
+    internal lateinit var googleAuthProvider: GoogleAuthProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        App.appComponent.activityComponent().inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -39,7 +45,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun logout() {
-        googleAuthHelper.logout()
+        googleAuthProvider.logout()
         startActivity(AuthActivity.createIntent(this))
         finish()
     }

@@ -1,4 +1,4 @@
-package com.testtask.testtasktchk
+package com.testtask.testtasktchk.ui
 
 import android.app.Activity
 import android.content.Context
@@ -10,15 +10,23 @@ import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInResult
 import com.google.android.material.snackbar.Snackbar
+import com.testtask.testtasktchk.auth.GoogleAuthProvider
+import com.testtask.testtasktchk.R
+import com.testtask.testtasktchk.app.App
+import javax.inject.Inject
 
 /**
  * @autor d.snytko
  */
 class AuthActivity : AppCompatActivity() {
-    private val googleAuthHelper: GoogleAuthHelper by lazy(LazyThreadSafetyMode.NONE) { GoogleAuthHelper(this) }
+
     private lateinit var signInButton: View
 
+    @Inject
+    internal lateinit var googleAuthProvider : GoogleAuthProvider
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        App.appComponent.activityComponent().inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_auth_layout)
 
@@ -36,7 +44,7 @@ class AuthActivity : AppCompatActivity() {
     }
 
     private fun signInGoogle() {
-        val intent = googleAuthHelper.getIntent()
+        val intent = googleAuthProvider.getSignIntent()
 
         startActivityForResult(intent, SIGN_GOOGLE_REQUEST)
     }
