@@ -11,7 +11,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
  */
 class GoogleAuthHelper(context: Context) {
 
-    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+    private val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestEmail()
         .build()
 
@@ -20,5 +20,9 @@ class GoogleAuthHelper(context: Context) {
     fun getIntent () : Intent {
         return mGoogleSignInClient.signInIntent
     }
+    fun logout() {
+        mGoogleSignInClient.revokeAccess()
+    }
+
 }
 

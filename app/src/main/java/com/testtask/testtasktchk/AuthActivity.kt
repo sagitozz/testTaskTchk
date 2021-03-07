@@ -1,6 +1,7 @@
 package com.testtask.testtasktchk
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -14,14 +15,13 @@ import com.google.android.material.snackbar.Snackbar
  * @autor d.snytko
  */
 class AuthActivity : AppCompatActivity() {
-    private lateinit var googleAuthHelper: GoogleAuthHelper
+    private val googleAuthHelper: GoogleAuthHelper by lazy(LazyThreadSafetyMode.NONE) { GoogleAuthHelper(this) }
     private lateinit var signInButton: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_auth_layout)
 
-        googleAuthHelper = GoogleAuthHelper(this)
         signInButton = findViewById(R.id.sign_in_button)
         signInButton.setOnClickListener { signInGoogle() }
     }
@@ -61,6 +61,7 @@ class AuthActivity : AppCompatActivity() {
                 avatarUrl = it.photoUrl
             )
         )
+        finish()
     }
 
     private fun showError() {
@@ -68,6 +69,11 @@ class AuthActivity : AppCompatActivity() {
     }
 
     companion object {
+
         private const val SIGN_GOOGLE_REQUEST = 111
+
+        fun createIntent(context: Context) : Intent {
+            return Intent(context, AuthActivity::class.java)
+        }
     }
 }

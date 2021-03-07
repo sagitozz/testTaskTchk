@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -11,6 +12,8 @@ import com.google.android.material.navigation.NavigationView
 import com.squareup.picasso.Picasso
 
 class MainActivity : AppCompatActivity() {
+
+    private val googleAuthHelper: GoogleAuthHelper by lazy(LazyThreadSafetyMode.NONE) { GoogleAuthHelper(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,6 +23,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initDrawer() {
+        findViewById<View>(R.id.logout_button).setOnClickListener { logout() }
+
         val navigationView = findViewById<NavigationView>(R.id.nav_view).getHeaderView(0)
 
         with(navigationView) {
@@ -31,6 +36,12 @@ class MainActivity : AppCompatActivity() {
                 .error(R.drawable.common_google_signin_btn_icon_dark)
                 .into(findViewById<ImageView>(R.id.user_avatar_image))
         }
+    }
+
+    private fun logout() {
+        googleAuthHelper.logout()
+        startActivity(AuthActivity.createIntent(this))
+        finish()
     }
 
     companion object {
