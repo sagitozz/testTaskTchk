@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">testTaskTchk</string>
+    <string name="enter_user_name">Введите имя пользователя</string>
+    <string name="user_avatar">user_avatar</string>
 </resources>

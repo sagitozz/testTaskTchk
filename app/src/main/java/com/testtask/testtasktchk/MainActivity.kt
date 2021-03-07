@@ -1,54 +1,49 @@
 package com.testtask.testtasktchk
 
-import android.app.Activity
+import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.net.Uri
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
-import com.google.android.gms.auth.api.Auth
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.navigation.NavigationView
+import com.squareup.picasso.Picasso
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var googleAuthHelper: GoogleAuthHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        googleAuthHelper = GoogleAuthHelper(this)
-
-        findViewById<View>(R.id.sign_in_button).setOnClickListener {
-            signInGoogle()
-        }
-
+        initDrawer()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == SIGN_GOOGLE_REQUEST) {
-            if (resultCode == Activity.RESULT_OK) {
-                val result = Auth.GoogleSignInApi.getSignInResultFromIntent(data)
+    private fun initDrawer() {
+        val navigationView = findViewById<NavigationView>(R.id.nav_view).getHeaderView(0)
 
-                if (result != null) {
-                    if (result.isSuccess) {
-                        result.signInAccount?.let {
-                            Toast.makeText(this, result.signInAccount!!.displayName, Toast.LENGTH_LONG).show()
-                        }
-                    }
-                }
-            } else {
-            //TODO обработать результат
-            }
+        with(navigationView) {
+            findViewById<TextView>(R.id.user_name).text = intent.getStringExtra(EXTRA_NAME)
+            findViewById<TextView>(R.id.user_email).text = intent.getStringExtra(EXTRA_EMAIL)
+
+            Picasso.get()
+                .load(intent.getParcelableExtra<Uri>(EXTRA_AVATAR_URL))
+                .error(R.drawable.common_google_signin_btn_icon_dark)
+                .into(findViewById<ImageView>(R.id.user_avatar_image))
         }
-    }
-
-    private fun signInGoogle() {
-        val intent = googleAuthHelper.getIntent()
-
-        startActivityForResult(intent, SIGN_GOOGLE_REQUEST)
     }
 
     companion object {
-        const val SIGN_GOOGLE_REQUEST = 111
+
+        private const val EXTRA_NAME = "name"
+        private const val EXTRA_EMAIL = "email"
+        private const val EXTRA_AVATAR_URL = "avatar_url"
+
+        fun createIntent(context: Context, name: String?, email: String?, avatarUrl: Uri?): Intent {
+            return Intent(context, MainActivity::class.java)
+                .putExtra(EXTRA_NAME, name)
+                .putExtra(EXTRA_EMAIL, email)
+                .putExtra(EXTRA_AVATAR_URL, avatarUrl)
+        }
     }
 }
