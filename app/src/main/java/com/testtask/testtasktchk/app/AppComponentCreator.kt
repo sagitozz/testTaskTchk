@@ -5,6 +5,7 @@ import com.testtask.testtasktchk.di.AppComponent
 import com.testtask.testtasktchk.di.DaggerAppComponent
 import com.testtask.testtasktchk.di.app.DaggerApplicationComponent
 import com.testtask.testtasktchk.di.googleauth.DaggerGoogleAuthComponent
+import com.testtask.testtasktchk.di.users.DaggerUserComponent
 
 /**
  * @autor d.snytko

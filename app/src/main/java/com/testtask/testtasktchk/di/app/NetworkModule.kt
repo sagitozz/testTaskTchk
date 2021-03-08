@@ -14,7 +14,7 @@ import javax.inject.Singleton
 class NetworkModule {
 
     @Provides
-    @Singleton
+    //TODO make singletone
     fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create())

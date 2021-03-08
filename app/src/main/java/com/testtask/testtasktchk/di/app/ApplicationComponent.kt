@@ -9,7 +9,6 @@ import javax.inject.Singleton
 /**
  * @autor d.snytko
  */
-@Singleton
 @Component(
     modules = [NetworkModule::class]
 )

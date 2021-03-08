@@ -51,11 +51,11 @@ class UsersAdapter : RecyclerView.Adapter<UsersAdapter.ViewHolder>() {
                 findViewById<TextView>(R.id.user_login).text = user.login
                 findViewById<TextView>(R.id.user_id).text = user.id.toString()
 
-                Picasso.get()
-                    .load(user.avatarUrl)
-                    .error(R.drawable.ic_logout_24px)
-                    .placeholder(R.drawable.ic_logout_24px)
-                    .into(findViewById<ImageView>(R.id.user_avatar_image))
+//                Picasso.get()
+//                    .load(user.avatarUrl)
+//                    .error(R.drawable.ic_logout_24px)
+//                    .placeholder(R.drawable.ic_logout_24px)
+//                    .into(findViewById<ImageView>(R.id.user_avatar_image))
             }
         }
     }

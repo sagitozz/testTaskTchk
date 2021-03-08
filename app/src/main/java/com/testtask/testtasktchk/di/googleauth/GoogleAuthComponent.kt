@@ -8,7 +8,6 @@ import javax.inject.Singleton
 /**
  * @autor d.snytko
  */
-@Singleton
 @Component(
     dependencies = [ApplicationComponent::class],
     modules = [GoogleAuthModule::class]

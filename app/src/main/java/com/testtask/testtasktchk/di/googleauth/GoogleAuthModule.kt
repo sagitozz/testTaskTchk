@@ -13,6 +13,5 @@ import javax.inject.Singleton
 interface GoogleAuthModule {
 
     @Binds
-    @Singleton
     fun bindsGoogleAuthProvider(impl: GoogleAuthProviderImpl): GoogleAuthProvider
 }

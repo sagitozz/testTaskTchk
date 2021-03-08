@@ -12,6 +12,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.navigation.NavigationView
 import com.squareup.picasso.Picasso
 import com.testtask.testtasktchk.R
@@ -38,7 +39,12 @@ class SearchActivity : AppCompatActivity() {
 
         initDrawer()
         initSearchView()
+        initRecycler()
         initViewModel()
+    }
+
+    private fun initRecycler() {
+        findViewById<RecyclerView>(R.id.users_recycler).adapter = usersListAdapter
     }
 
     private fun initViewModel() {
