@@ -15,10 +15,15 @@ import com.testtask.testtasktchk.data.entities.User
  * @autor d.snytko
  */
 class UsersAdapter : RecyclerView.Adapter<UsersAdapter.ViewHolder>() {
-    var currentPage = 1 // Текущая страница
-    lateinit var callback: Callback
 
-    var users = listOf<User>()
+    private val differ = AsyncListDiffer(this, UserDiffUtilCallback())
+
+    var users: List<User> = listOf()
+        set(value) {
+            differ.submitList(value)
+            field = value
+        }
+        get() = differ.currentList
 
     fun update(dataList: List<User>) {
         users = dataList.toMutableList()
@@ -36,11 +41,6 @@ class UsersAdapter : RecyclerView.Adapter<UsersAdapter.ViewHolder>() {
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(position)
-
-        if (position == users.size - 1) {
-            // Достигнут конец списка, нужно подгрузить новые данные
-            callback.onLoadUsersForNextPage(++currentPage)
-        }
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -51,18 +51,12 @@ class UsersAdapter : RecyclerView.Adapter<UsersAdapter.ViewHolder>() {
                 findViewById<TextView>(R.id.user_login).text = user.login
                 findViewById<TextView>(R.id.user_id).text = user.id.toString()
 
-//                Picasso.get()
-//                    .load(user.avatarUrl)
-//                    .error(R.drawable.ic_logout_24px)
-//                    .placeholder(R.drawable.ic_logout_24px)
-//                    .into(findViewById<ImageView>(R.id.user_avatar_image))
+                Picasso.get()
+                    .load(user.avatarUrl)
+                    .error(R.drawable.ic_logout_24px)
+                    .placeholder(R.drawable.ic_logout_24px)
+                    .into(findViewById<ImageView>(R.id.user_avatar))
             }
         }
-    }
-
-    interface Callback {
-        // Уведомляет о достижении конца списка и передает номер следующей страницы
-        // для которой нужно загрузить новую порцию данных
-        fun onLoadUsersForNextPage(nextPage: Int)
     }
 }

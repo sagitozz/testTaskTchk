@@ -6,12 +6,13 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
+import android.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.navigation.NavigationView
 import com.squareup.picasso.Picasso
@@ -19,12 +20,15 @@ import com.testtask.testtasktchk.R
 import com.testtask.testtasktchk.app.App
 import com.testtask.testtasktchk.auth.GoogleAuthProvider
 import com.testtask.testtasktchk.ui.auth.AuthActivity
+import io.reactivex.Flowable
 import javax.inject.Inject
 
 class SearchActivity : AppCompatActivity() {
 
     private val searchViewModel: SearchViewModel by viewModels { viewModelFactory }
     private val usersListAdapter by lazy { UsersAdapter() }
+    private val flowableQuery: Flowable<String> by lazy { RxSearch.from(searchView) }
+    private val searchView: SearchView by lazy { findViewById(R.id.search_field) }
 
     @Inject
     internal lateinit var googleAuthProvider: GoogleAuthProvider
@@ -38,18 +42,27 @@ class SearchActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         initDrawer()
-        initSearchView()
         initRecycler()
         initViewModel()
+        initSearchView()
     }
 
     private fun initRecycler() {
-        findViewById<RecyclerView>(R.id.users_recycler).adapter = usersListAdapter
+        findViewById<RecyclerView>(R.id.users_recycler).apply {
+            adapter = usersListAdapter
+            addOnScrollListener(object : PaginationListener(layoutManager as LinearLayoutManager) {
+                override fun loadMoreItems() = searchViewModel.searchFromQueryNextPage(searchView.query.toString())
+
+                override fun isLastPage(): Boolean = false
+
+                override fun isLoading(): Boolean = searchViewModel.recyclerViewPageLoading
+            })
+        }
     }
 
     private fun initViewModel() {
-        searchViewModel.userLiveData.observe(this, Observer {   userList ->
-            usersListAdapter.update(userList.users)
+        searchViewModel.userLiveData.observe(this, Observer { userList ->
+            usersListAdapter.update(userList)
         })
         searchViewModel.errorLiveData.observe(this, Observer { error ->
             Toast.makeText(this, error.message, Toast.LENGTH_LONG).show()
@@ -66,16 +79,15 @@ class SearchActivity : AppCompatActivity() {
             findViewById<TextView>(R.id.user_email).text = intent.getStringExtra(EXTRA_EMAIL)
 
             Picasso.get()
-                .load(intent.getParcelableExtra<Uri>(EXTRA_AVATAR_URL))
+                .load(intent.getStringExtra(EXTRA_AVATAR_URL))
                 .error(R.drawable.common_google_signin_btn_icon_dark)
                 .into(findViewById<ImageView>(R.id.user_avatar_image))
         }
     }
 
     private fun initSearchView() {
-        findViewById<TextView>(R.id.search_field).addTextChangedListener {
-        searchViewModel.search(it.toString())
-        }
+
+        searchViewModel.searchFromQuery(flowableQuery)
     }
 
     private fun logout() {

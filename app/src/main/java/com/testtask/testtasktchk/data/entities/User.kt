@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 /**
  * @autor d.snytko
  */
-class User(
+data class User(
     @SerializedName("id")
     val id: Long,
 
