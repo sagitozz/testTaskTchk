@@ -25,7 +25,7 @@ class RxSearch {
             }, BackpressureStrategy.BUFFER)
                 .debounce(600, TimeUnit.MILLISECONDS)
                 .filter { s -> s.isNotEmpty() }
-                .distinctUntilChanged()
+//                .distinctUntilChanged()
         }
     }
 }

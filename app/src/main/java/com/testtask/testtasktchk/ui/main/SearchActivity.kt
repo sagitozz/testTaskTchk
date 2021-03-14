@@ -4,13 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
-import android.widget.ImageView
-import android.widget.SearchView
-import android.widget.TextView
-import android.widget.Toast
+import android.view.ViewGroup
+import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +20,7 @@ import com.testtask.testtasktchk.R
 import com.testtask.testtasktchk.app.App
 import com.testtask.testtasktchk.auth.GoogleAuthProvider
 import com.testtask.testtasktchk.ui.auth.AuthActivity
+import com.testtask.testtasktchk.ui.main.recycler.PaginationListener
 import io.reactivex.Flowable
 import javax.inject.Inject
 
@@ -27,8 +28,8 @@ class SearchActivity : AppCompatActivity() {
 
     private val searchViewModel: SearchViewModel by viewModels { viewModelFactory }
     private val usersListAdapter by lazy { UsersAdapter() }
-    private val flowableQuery: Flowable<String> by lazy { RxSearch.from(searchView) }
     private val searchView: SearchView by lazy { findViewById(R.id.search_field) }
+    private val flowableQuery: Flowable<String> by lazy { RxSearch.from(searchView) }
 
     @Inject
     internal lateinit var googleAuthProvider: GoogleAuthProvider
@@ -41,6 +42,10 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        findViewById<View>(R.id.retryButton).setOnClickListener {
+            searchViewModel.searchFromQuery(flowableQuery)
+        }
+
         initDrawer()
         initRecycler()
         initViewModel()
@@ -51,7 +56,10 @@ class SearchActivity : AppCompatActivity() {
         findViewById<RecyclerView>(R.id.users_recycler).apply {
             adapter = usersListAdapter
             addOnScrollListener(object : PaginationListener(layoutManager as LinearLayoutManager) {
-                override fun loadMoreItems() = searchViewModel.searchFromQueryNextPage(searchView.query.toString())
+                override fun loadMoreItems() {
+                                searchViewModel.searchFromQueryNextPage(searchView.query.toString())
+                                Log.d("XXX", "Load more items 2")
+                }
 
                 override fun isLastPage(): Boolean = false
 
@@ -61,11 +69,24 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun initViewModel() {
-        searchViewModel.userLiveData.observe(this, Observer { userList ->
-            usersListAdapter.update(userList)
-        })
-        searchViewModel.errorLiveData.observe(this, Observer { error ->
-            Toast.makeText(this, error.message, Toast.LENGTH_LONG).show()
+//        searchViewModel.userLiveData.observe(this, Observer { userList ->
+//            usersListAdapter.update(userList)
+//        })
+//        searchViewModel.errorLiveData.observe(this, Observer { error ->
+//            Toast.makeText(this, error.message, Toast.LENGTH_LONG).show()
+//        })
+        searchViewModel.concLiveData.observe(this, Observer { result ->
+            when (result) {
+                is SearchViewModel.SearchState.Result ->  {
+                    findViewById<View>(R.id.error_layout).isVisible = false
+                    usersListAdapter.update(result.data)
+                }
+                is SearchViewModel.SearchState.Error -> {
+                    findViewById<View>(R.id.error_layout).isVisible = true
+                    Toast.makeText(this, result.message, Toast.LENGTH_LONG).show()
+                }
+                is SearchViewModel.SearchState.Empty -> Toast.makeText(this, "No result", Toast.LENGTH_LONG).show()
+            }
         })
     }
 
@@ -86,7 +107,6 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun initSearchView() {
-
         searchViewModel.searchFromQuery(flowableQuery)
     }
 

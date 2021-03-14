@@ -1,4 +1,4 @@
-package com.testtask.testtasktchk.ui.main
+package com.testtask.testtasktchk.ui.main.recycler
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
