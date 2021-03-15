@@ -85,7 +85,6 @@ class SearchActivity : AppCompatActivity() {
                     Toast.makeText(this, result.message, Toast.LENGTH_LONG).show()
                 }
                 is SearchViewModel.SearchState.Empty -> Snackbar.make(searchView, "Нет пользователей с похожим именем", Snackbar.LENGTH_SHORT).show()
-                is SearchViewModel.SearchState.EndOfList -> Snackbar.make(searchView, "Больше пользователей нет", Snackbar.LENGTH_SHORT).show()
             }
         })
     }

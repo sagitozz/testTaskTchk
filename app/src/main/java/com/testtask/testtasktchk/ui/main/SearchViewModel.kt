@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit
  */
 class SearchViewModel(private val repository: UsersRepository) : BaseViewModel() {
 
-    private val _concLiveData = MutableLiveData<SearchState>()
-    val concLiveData: LiveData<SearchState> get() = _concLiveData
+    private val _searchLiveData = MutableLiveData<SearchState>()
+    val searchLiveData: LiveData<SearchState> get() = _searchLiveData
 
     var recyclerViewPageLoading = false
 
@@ -26,42 +26,57 @@ class SearchViewModel(private val repository: UsersRepository) : BaseViewModel()
             .filter { s -> s.first.isNotEmpty() }
             .distinctUntilChanged()
             .subscribeOn(Schedulers.io())
-            .doOnNext { (_, page) ->
-                if (page == 1) {
-                    SearchState.Result(emptyList())
-                    _concLiveData.postValue(SearchState.Result(emptyList()))
+            .doOnNext { (_, page) -> checkIfFirstPage(page) }
+            .switchMap { (query, page) -> sendRequest(query, page) }
+            .map { concatUserList(it) }
+            .map { items ->
+                if (items.isNotEmpty()) {
+                    SearchState.Result(items)
+                } else {
+                    SearchState.Empty
                 }
             }
-            .switchMap { (query, page) ->
-                recyclerViewPageLoading = true
-                repository.getUsers(query, page).toObservable()
-                    .onErrorResumeNext(Function {
-                        _concLiveData.postValue(SearchState.Error(it.message, it))
-                        Observable.just(emptyList())
-                    })
-            }
-            .map { concatUserList(it) }
-            .map { items -> if (items.isNotEmpty()) SearchState.Result(items) else SearchState.Empty }
             .subscribe(
                 { state ->
-                    _concLiveData.postValue(state)
+                    _searchLiveData.postValue(state)
                     recyclerViewPageLoading = false
                 },
                 { error ->
-                    _concLiveData.postValue(SearchState.Error(error.message, IllegalStateException()))
+                    _searchLiveData.postValue(SearchState.Error(error.message, error))
                 }
             ).disposeOnFinish()
     }
 
-    private fun concatUserList(list: SearchState.Result): List<User> {
-        val currentList = _concLiveData.value as SearchState.Result
-        return currentList.data.toMutableList().apply { addAll(list.data) }
+    private fun checkIfFirstPage(page: Int) {
+        if (page == 1) {
+            SearchState.Result(emptyList())
+            _searchLiveData.postValue(SearchState.Result(emptyList()))
+        }
+    }
+
+    private fun sendRequest(
+        query: String,
+        page: Int
+    ): Observable<List<User>>? {
+        recyclerViewPageLoading = true
+        return repository.getUsers(query, page).toObservable()
+            .onErrorResumeNext(Function {
+                _searchLiveData.postValue(SearchState.Error(it.message, it))
+                Observable.just(emptyList())
+            })
+    }
+
+    private fun concatUserList(list: List<User>): List<User> {
+        val result = _searchLiveData.value
+        val state: SearchState.Result = if (result is SearchState.Result) result else return emptyList()
+
+        return state.data.toMutableList()
+            .apply { addAll(list) }
     }
 
     sealed class SearchState {
         data class Result(val data: List<User>) : SearchState()
         class Error(val message: String?, val throwable: Throwable) : SearchState()
         object Empty : SearchState()
-        object EndOfList : SearchState()
     }
 }
