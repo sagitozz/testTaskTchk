@@ -20,5 +20,4 @@ abstract class BaseViewModel : ViewModel() {
         viewModelDisposable.add(this)
         return this
     }
-
 }

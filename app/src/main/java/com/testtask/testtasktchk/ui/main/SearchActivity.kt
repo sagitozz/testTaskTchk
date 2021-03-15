@@ -5,7 +5,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.*
+import android.widget.ImageView
+import android.widget.SearchView
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -84,7 +86,7 @@ class SearchActivity : AppCompatActivity() {
                     findViewById<View>(R.id.error_layout).isVisible = true
                     Toast.makeText(this, result.message, Toast.LENGTH_LONG).show()
                 }
-                is SearchViewModel.SearchState.Empty -> Snackbar.make(searchView, "Нет пользователей с похожим именем", Snackbar.LENGTH_SHORT).show()
+                is SearchViewModel.SearchState.Empty -> Unit
             }
         })
     }

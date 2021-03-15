@@ -29,13 +29,7 @@ class SearchViewModel(private val repository: UsersRepository) : BaseViewModel()
             .doOnNext { (_, page) -> checkIfFirstPage(page) }
             .switchMap { (query, page) -> sendRequest(query, page) }
             .map { concatUserList(it) }
-            .map { items ->
-                if (items.isNotEmpty()) {
-                    SearchState.Result(items)
-                } else {
-                    SearchState.Empty
-                }
-            }
+            .map { items -> if (items.isNotEmpty()) SearchState.Result(items) else SearchState.Empty }
             .subscribe(
                 { state ->
                     _searchLiveData.postValue(state)
