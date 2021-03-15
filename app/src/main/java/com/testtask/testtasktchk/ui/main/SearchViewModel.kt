@@ -1,15 +1,14 @@
 package com.testtask.testtasktchk.ui.main
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.testtask.testtasktchk.data.entities.User
 import com.testtask.testtasktchk.data.repository.UsersRepository
 import com.testtask.testtasktchk.ui.BaseViewModel
-import io.reactivex.Flowable
-import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.Observable
+import io.reactivex.functions.Function
 import io.reactivex.schedulers.Schedulers
-import java.lang.IllegalStateException
+import java.util.concurrent.TimeUnit
 
 /**
  * @autor d.snytko
@@ -19,73 +18,39 @@ class SearchViewModel(private val repository: UsersRepository) : BaseViewModel()
     private val _concLiveData = MutableLiveData<SearchState>()
     val concLiveData: LiveData<SearchState> get() = _concLiveData
 
+    var recyclerViewPageLoading = false
 
-//    private val _userLiveData = MutableLiveData<List<User>>()
-//    val userLiveData: LiveData<List<User>> get() = _userLiveData
-//
-//    private val _errorLiveData = MutableLiveData<Throwable>()
-//    val errorLiveData: LiveData<Throwable> get() = _errorLiveData
-
-    private var page: Int = 1
-
-    var recyclerViewPageLoading: Boolean = false
-
-    fun searchFromQuery(flowableQuery: Flowable<String>) {
-//        recyclerViewPageLoading = false
-     flowableQuery
-            .flatMapSingle { query ->
-
-                     repository.getUsers(query, page)
+    fun searchFromQuery(search: Observable<Pair<String, Int>>) {
+        search
+            .debounce(600, TimeUnit.MILLISECONDS)
+            .filter { s -> s.first.isNotEmpty() }
+            .distinctUntilChanged()
+            .subscribeOn(Schedulers.io())
+            .doOnNext { (_, page) ->
+                if (page == 1) {
+                    SearchState.Result(emptyList())
+                    _concLiveData.postValue(SearchState.Result(emptyList()))
+                }
             }
-//            .doOnSubscribe { _concLiveData.postValue(SearchUsers.Loading) }
-            .subscribeOn(Schedulers.io())
-            .doOnSubscribe {
-                _concLiveData.value = null }
-         .doOnNext { recyclerViewPageLoading = false; page = 1 }
+            .switchMap { (query, page) ->
+                recyclerViewPageLoading = true
+                repository.getUsers(query, page).toObservable()
+                    .onErrorResumeNext(Function {
+                        _concLiveData.postValue(SearchState.Error(it.message, it))
+                        Observable.just(emptyList())
+                    })
+            }
+            .map { concatUserList(it) }
+            .map { items -> if (items.isNotEmpty()) SearchState.Result(items) else SearchState.Empty }
             .subscribe(
-                { users ->
-                    Log.d("XXX", "request")
-                    if (users.isNotEmpty()) {
-                        _concLiveData.postValue(SearchState.Result(users))
-//                        _userLiveData.postValue(users)
-                    } else {
-                        _concLiveData.postValue(SearchState.Empty)
-//                        _errorLiveData.postValue(Throwable("Пользователь с таким именем не найден"))
-                    }
+                { state ->
+                    _concLiveData.postValue(state)
+                    recyclerViewPageLoading = false
                 },
                 { error ->
                     _concLiveData.postValue(SearchState.Error(error.message, IllegalStateException()))
-//                    _errorLiveData.postValue(error)
                 }
-            )
-            .disposeOnFinish()
-    }
-
-    fun searchFromQueryNextPage(query: String) {
-        recyclerViewPageLoading = true
-        page += 1
-
-        repository.getUsers(query, page)
-            .subscribeOn(Schedulers.io())
-            .doOnSuccess { recyclerViewPageLoading = false }
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                { users ->
-                    Log.d("XXX", "request")
-                    if (users.isNotEmpty()) {
-                        _concLiveData.postValue(SearchState.Result(concatUserList(SearchState.Result(users))))
-//                    _userLiveData.postValue(concatUserList(users))
-                    }
-//                    else {
-//                        _concLiveData.postValue(SearchState.Error("Достингут конец списка", IllegalStateException()))}
-                },
-                { error ->
-//                    _errorLiveData.postValue(error)
-                    _concLiveData.postValue(SearchState.Error(error.message, IllegalStateException()))
-                    _concLiveData.value = null
-                }
-            )
-            .disposeOnFinish()
+            ).disposeOnFinish()
     }
 
     private fun concatUserList(list: SearchState.Result): List<User> {
@@ -97,5 +62,6 @@ class SearchViewModel(private val repository: UsersRepository) : BaseViewModel()
         data class Result(val data: List<User>) : SearchState()
         class Error(val message: String?, val throwable: Throwable) : SearchState()
         object Empty : SearchState()
+        object EndOfList : SearchState()
     }
 }

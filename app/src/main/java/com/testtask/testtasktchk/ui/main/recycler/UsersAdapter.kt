@@ -1,4 +1,4 @@
-package com.testtask.testtasktchk.ui.main
+package com.testtask.testtasktchk.ui.main.recycler
 
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import com.testtask.testtasktchk.R
 import com.testtask.testtasktchk.data.entities.User
+import com.testtask.testtasktchk.ui.main.UserDiffUtilCallback
 
 /**
  * @autor d.snytko
@@ -53,8 +54,8 @@ class UsersAdapter : RecyclerView.Adapter<UsersAdapter.ViewHolder>() {
 
                 Picasso.get()
                     .load(user.avatarUrl)
-                    .error(R.drawable.ic_logout_24px)
-                    .placeholder(R.drawable.ic_logout_24px)
+                    .error(R.drawable.ic_baseline_error_24)
+                    .placeholder(R.drawable.ic_baseline_person_24)
                     .into(findViewById<ImageView>(R.id.user_avatar))
             }
         }

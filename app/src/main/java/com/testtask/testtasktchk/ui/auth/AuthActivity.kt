@@ -74,7 +74,7 @@ class AuthActivity : AppCompatActivity() {
     }
 
     private fun showError() {
-        Snackbar.make(signInButton, "Ошибка авторизации", Snackbar.LENGTH_SHORT).show()
+        Snackbar.make(signInButton, getString(R.string.authorization_error), Snackbar.LENGTH_SHORT).show()
     }
 
     companion object {

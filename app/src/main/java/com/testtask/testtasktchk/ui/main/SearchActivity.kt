@@ -4,24 +4,23 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.snackbar.Snackbar
 import com.squareup.picasso.Picasso
 import com.testtask.testtasktchk.R
 import com.testtask.testtasktchk.app.App
 import com.testtask.testtasktchk.auth.GoogleAuthProvider
 import com.testtask.testtasktchk.ui.auth.AuthActivity
 import com.testtask.testtasktchk.ui.main.recycler.PaginationListener
-import io.reactivex.Flowable
+import com.testtask.testtasktchk.ui.main.recycler.UsersAdapter
+import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
 import javax.inject.Inject
 
 class SearchActivity : AppCompatActivity() {
@@ -85,7 +84,8 @@ class SearchActivity : AppCompatActivity() {
                     findViewById<View>(R.id.error_layout).isVisible = true
                     Toast.makeText(this, result.message, Toast.LENGTH_LONG).show()
                 }
-                is SearchViewModel.SearchState.Empty -> Toast.makeText(this, "No result", Toast.LENGTH_LONG).show()
+                is SearchViewModel.SearchState.Empty -> Snackbar.make(searchView, "Нет пользователей с похожим именем", Snackbar.LENGTH_SHORT).show()
+                is SearchViewModel.SearchState.EndOfList -> Snackbar.make(searchView, "Больше пользователей нет", Snackbar.LENGTH_SHORT).show()
             }
         })
     }
@@ -101,7 +101,8 @@ class SearchActivity : AppCompatActivity() {
 
             Picasso.get()
                 .load(intent.getStringExtra(EXTRA_AVATAR_URL))
-                .error(R.drawable.common_google_signin_btn_icon_dark)
+                .error(R.drawable.ic_baseline_error_24)
+                .placeholder(R.drawable.ic_baseline_person_24)
                 .into(findViewById<ImageView>(R.id.user_avatar_image))
         }
     }

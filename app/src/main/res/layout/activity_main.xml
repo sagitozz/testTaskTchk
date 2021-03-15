@@ -25,15 +25,15 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="@dimen/double_padding">
 
         <TextView
             android:id="@+id/logout_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:padding="@dimen/default_padding"
             android:text="@string/exit"
-            android:drawablePadding="8dp"
+            android:drawablePadding="@dimen/default_padding"
             app:drawableStartCompat="@drawable/ic_logout_24px" />
     </LinearLayout>
     </com.google.android.material.navigation.NavigationView>
