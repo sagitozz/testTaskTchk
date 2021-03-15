@@ -30,7 +30,8 @@ class SearchActivity : AppCompatActivity() {
     private val searchViewModel: SearchViewModel by viewModels { viewModelFactory }
     private val usersListAdapter by lazy { UsersAdapter() }
     private val searchView: SearchView by lazy { findViewById(R.id.search_field) }
-    private val flowableQuery: Flowable<String> by lazy { RxSearch.from(searchView) }
+    private var page: Int = 1
+    private var lastText: String = ""
 
     @Inject
     internal lateinit var googleAuthProvider: GoogleAuthProvider
@@ -43,48 +44,19 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        findViewById<View>(R.id.retryButton).setOnClickListener {
-            searchViewModel.searchFromQuery(flowableQuery)
-        }
-
         initDrawer()
-        initRecycler()
         initViewModel()
         initSearchView()
     }
 
-    private fun initRecycler() {
-        findViewById<RecyclerView>(R.id.users_recycler).apply {
-            adapter = usersListAdapter
-            addOnScrollListener(object : PaginationListener(layoutManager as LinearLayoutManager) {
-                override fun loadMoreItems() {
-                                searchViewModel.searchFromQueryNextPage(searchView.query.toString())
-                                Log.d("XXX", "Load more items 2")
-                }
-
-                override fun isLastPage(): Boolean = false
-
-                override fun isLoading(): Boolean = searchViewModel.recyclerViewPageLoading
-            })
-        }
-    }
-
     private fun initViewModel() {
-//        searchViewModel.userLiveData.observe(this, Observer { userList ->
-//            usersListAdapter.update(userList)
-//        })
-//        searchViewModel.errorLiveData.observe(this, Observer { error ->
-//            Toast.makeText(this, error.message, Toast.LENGTH_LONG).show()
-//        })
-        searchViewModel.concLiveData.observe(this, Observer { result ->
+        searchViewModel.searchLiveData.observe(this, { result ->
             when (result) {
-                is SearchViewModel.SearchState.Result ->  {
-                    findViewById<View>(R.id.error_layout).isVisible = false
+                is SearchViewModel.SearchState.Result -> {
                     usersListAdapter.update(result.data)
                 }
                 is SearchViewModel.SearchState.Error -> {
-                    findViewById<View>(R.id.error_layout).isVisible = true
-                    Toast.makeText(this, result.message, Toast.LENGTH_LONG).show()
+                    Snackbar.make(searchView, "Error: ${result.message}", Snackbar.LENGTH_SHORT).show()
                 }
                 is SearchViewModel.SearchState.Empty -> Unit
             }
@@ -109,7 +81,41 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun initSearchView() {
-        searchViewModel.searchFromQuery(flowableQuery)
+        val search = Observable.create<Pair<String, Int>> { emitter ->
+            addQueryListener(emitter)
+            addPageListener(emitter)
+        }
+        searchViewModel.searchFromQuery(search)
+    }
+
+    private fun addPageListener(emitter: ObservableEmitter<Pair<String, Int>>) {
+        findViewById<RecyclerView>(R.id.users_recycler).apply {
+            adapter = usersListAdapter
+            addOnScrollListener(object : PaginationListener(layoutManager as LinearLayoutManager) {
+                override fun loadMoreItems() {
+                    emitter.onNext(lastText to ++page)
+                }
+
+                override fun isLoading(): Boolean {
+                    return searchViewModel.recyclerViewPageLoading
+                }
+            })
+        }
+    }
+
+    private fun addQueryListener(emitter: ObservableEmitter<Pair<String, Int>>) {
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                page = 1
+                lastText = newText
+                emitter.onNext(newText to page)
+                return false
+            }
+        })
     }
 
     private fun logout() {
