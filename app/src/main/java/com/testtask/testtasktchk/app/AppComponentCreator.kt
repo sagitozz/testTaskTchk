@@ -3,9 +3,9 @@ package com.testtask.testtasktchk.app
 import android.content.Context
 import com.testtask.testtasktchk.di.AppComponent
 import com.testtask.testtasktchk.di.DaggerAppComponent
-import com.testtask.testtasktchk.di.app.DaggerApplicationComponent
-import com.testtask.testtasktchk.di.googleauth.DaggerGoogleAuthComponent
-import com.testtask.testtasktchk.di.users.DaggerUserComponent
+import com.testtask.testtasktchk.di.app.DaggerApplicationComponentImpl
+import com.testtask.testtasktchk.di.googleauth.DaggerGoogleAuthComponentImpl
+import com.testtask.testtasktchk.di.users.DaggerUserComponentImpl
 
 /**
  * @autor d.snytko
@@ -13,12 +13,12 @@ import com.testtask.testtasktchk.di.users.DaggerUserComponent
 object AppComponentCreator {
 
     fun create(context: Context): AppComponent {
-        val applicationComponent = DaggerApplicationComponent.factory().create(context)
+        val applicationComponent = DaggerApplicationComponentImpl.factory().create(context)
 
         return DaggerAppComponent.factory().create(
             applicationComponent = applicationComponent,
-            googleAuthComponent = DaggerGoogleAuthComponent.factory().create(applicationComponent),
-            userComponent = DaggerUserComponent.factory().create(applicationComponent)
+            googleAuthComponent = DaggerGoogleAuthComponentImpl.factory().create(applicationComponent),
+            userComponent = DaggerUserComponentImpl.factory().create(applicationComponent)
         )
     }
 }

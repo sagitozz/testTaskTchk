@@ -8,13 +8,17 @@ import javax.inject.Singleton
 /**
  * @autor d.snytko
  */
+interface UserComponent {
+
+    val repository: UsersRepository
+}
+
+@Singleton
 @Component(
     dependencies = [ApplicationComponent::class],
     modules = [UserModule::class]
 )
-interface UserComponent {
-
-    val repository: UsersRepository
+interface UserComponentImpl : UserComponent {
 
     @Component.Factory
     interface Factory {

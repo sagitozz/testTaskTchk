@@ -17,7 +17,6 @@ import javax.inject.Singleton
         UserComponent::class
     ]
 )
-@Singleton
 interface AppComponent {
 
     fun inject(app: App)

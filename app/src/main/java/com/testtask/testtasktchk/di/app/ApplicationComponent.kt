@@ -9,14 +9,18 @@ import javax.inject.Singleton
 /**
  * @autor d.snytko
  */
-@Component(
-    modules = [NetworkModule::class]
-)
 interface ApplicationComponent {
 
     val context: Context
 
     val retrofit: Retrofit
+}
+
+@Singleton
+@Component(
+    modules = [NetworkModule::class]
+)
+interface ApplicationComponentImpl : ApplicationComponent {
 
     @Component.Factory
     interface Factory {
